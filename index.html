@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Matriculaciones DGT · Coches y motos</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light;
+--bg:#f4f6fa;--card:#fff;--tx:#14213d;--mu:#667085;--bd:#e3e8ef;--ac:#e63946;--ac2:#1d3557;--bar:#457b9d}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#0d1117;--card:#161b22;--tx:#e6edf3;--mu:#8b949e;--bd:#2d333b;--ac:#ff6b76;--ac2:#9ecbff;--bar:#4f8fc0}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#0d1117;--card:#161b22;--tx:#e6edf3;--mu:#8b949e;--bd:#2d333b;--ac:#ff6b76;--ac2:#9ecbff;--bar:#4f8fc0}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{padding:18px 20px 8px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+h1{margin:0;font-size:22px}h1 span{color:var(--ac)}.sub{color:var(--mu);font-size:12px}
+main{padding:0 20px 40px;max-width:1280px;margin:auto}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px}
+.row{display:grid;gap:12px;margin-bottom:12px}.g4{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}.g2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.kpi b{display:block;font-size:26px;letter-spacing:-.5px}.kpi small{color:var(--mu)}
+h2{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mu)}
+label{display:flex;flex-direction:column;font-size:11px;color:var(--mu);gap:3px}
+select,input,button{font:inherit;color:var(--tx);background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:7px 8px;min-width:0}
+button{cursor:pointer;background:var(--ac2);color:var(--card);border:0;font-weight:600}button.sec{background:var(--bg);color:var(--tx);border:1px solid var(--bd)}
+.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:10px;align-items:end}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0}.chip{background:var(--ac);color:#fff;border-radius:99px;padding:2px 10px;font-size:12px;cursor:pointer}
+.tabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}.tabs button{background:var(--bg);color:var(--tx);border:1px solid var(--bd)}.tabs button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.bars{max-height:420px;overflow:auto}.br{display:grid;grid-template-columns:minmax(80px,38%) 1fr auto;gap:8px;align-items:center;padding:3px 0;cursor:pointer;font-size:13px}
+.br:hover{background:var(--bg)}.br i{display:block;height:14px;border-radius:4px;background:var(--bar)}.br em{font-style:normal;color:var(--mu);font-variant-numeric:tabular-nums;font-size:12px}
+.br span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}th,td{padding:6px 8px;border-bottom:1px solid var(--bd);text-align:left;white-space:nowrap}th{cursor:pointer;color:var(--mu);font-size:12px}td.n,th.n{text-align:right}
+#drop{border:2px dashed var(--bd);border-radius:12px;padding:18px;text-align:center;color:var(--mu)}#drop.hv{border-color:var(--ac);background:var(--bg)}
+#st{font-size:12px;color:var(--mu);margin-top:6px;min-height:16px}svg text{fill:var(--mu);font-size:10px}.note{font-size:12px;color:var(--mu)}a{color:var(--ac2)}
+</style>
+</head>
+<body>
+<header>
+ <div><h1>Matriculaciones <span>DGT</span> · coches y motos</h1><div class="sub" id="meta">Sin datos cargados</div></div>
+ <div style="display:flex;gap:8px"><button class="sec" id="demo">Cargar datos de ejemplo</button><button class="sec" id="clear">Borrar datos</button><button class="sec" id="theme">◐</button></div>
+</header>
+<main>
+<div class="card row" style="margin-bottom:12px">
+ <div id="drop"><b>Arrastra aquí los ficheros diarios o mensuales de la DGT</b> (.zip o .txt, varios a la vez)<br>
+ <span class="note">Se procesan en tu navegador y se guardan en él; cada día nuevo se añade sin duplicar. Descarga desde
+ <a href="https://www.dgt.es/menusecundario/dgt-en-cifras/matraba-listados/matriculaciones-automoviles-diario.html" target="_blank" rel="noopener">dgt.es (diario)</a> o
+ <a href="https://www.dgt.es/menusecundario/dgt-en-cifras/matraba-listados/matriculaciones-automoviles-mensual.html" target="_blank" rel="noopener">dgt.es (mensual)</a>.</span><br>
+ <input type="file" id="file" multiple accept=".zip,.txt" style="margin-top:8px"></div>
+ <div id="st"></div>
+</div>
+
+<div class="card" style="margin-bottom:12px">
+ <div class="filters">
+  <label>Desde<input type="date" id="f-from"></label><label>Hasta<input type="date" id="f-to"></label>
+  <label>Vehículo<select id="f-cat"></select></label>
+  <label>Marca<input id="f-marca" list="dl-marca" placeholder="Todas"></label>
+  <label>Modelo<input id="f-modelo" list="dl-modelo" placeholder="Todos"></label>
+  <label>Provincia<select id="f-prov"></select></label>
+  <label>Combustible<select id="f-prop"></select></label>
+  <label>Cilindrada<select id="f-cc"></select></label>
+  <label>Estado<select id="f-nu"><option value="">Nuevo y usado</option><option value="N">Nuevos</option><option value="U">Usados</option></select></label>
+  <label>Titular<select id="f-pf"><option value="">Todos</option><option value="D">Particular</option><option value="X">Empresa</option></select></label>
+  <label>Año<select id="f-year"></select></label>
+  <button class="sec" id="reset">Limpiar</button>
+ </div>
+ <datalist id="dl-marca"></datalist><datalist id="dl-modelo"></datalist>
+ <div class="chips" id="chips"></div>
+</div>
+
+<div class="row g4" id="kpis"></div>
+
+<div class="card" style="margin-bottom:12px">
+ <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px"><h2>Evolución</h2>
+ <label style="flex-direction:row;align-items:center;gap:6px">Agrupar<select id="gran"><option value="auto">Auto</option><option value="d">Día</option><option value="m">Mes</option></select></label></div>
+ <div class="scroll"><svg id="tl" width="100%" height="220"></svg></div>
+</div>
+
+<div class="row g2">
+ <div class="card"><h2>Marcas</h2><div class="bars" id="b-marca"></div></div>
+ <div class="card"><h2>Modelos</h2><div class="bars" id="b-modelo"></div></div>
+ <div class="card"><h2>Provincias</h2><div class="bars" id="b-prov"></div></div>
+ <div class="card"><h2>Combustible</h2><div class="bars" id="b-prop"></div><h2 style="margin-top:14px">Cilindrada</h2><div class="bars" id="b-cc"></div></div>
+</div>
+
+<div class="card">
+ <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px"><h2>Detalle marca · modelo</h2>
+ <div style="display:flex;gap:8px"><input id="q" placeholder="Buscar…"><button class="sec" id="copy">Copiar tabla</button></div></div>
+ <div class="scroll"><table><thead><tr><th data-k="ma">Marca</th><th data-k="mo">Modelo</th><th data-k="cc" class="n">Cil. media</th><th data-k="kw" class="n">kW medio</th><th data-k="co2" class="n">CO₂ medio</th><th data-k="n" class="n">Unidades</th><th data-k="s" class="n">Cuota</th></tr></thead><tbody id="tb"></tbody></table></div>
+ <div class="note" id="tbn"></div>
+</div>
+<p class="note">Fuente: microdatos de matriculaciones de la DGT (licencia CC BY 4.0). Coche = categoría M1; moto = categorías L (L3e–L5e) y ciclomotor = L1e/L2e. Los datos de ejemplo son ficticios.</p>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js"></script>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const W=[8,1,8,30,22,1,21,2,1,5,6,6,6,3,2,2,2,2,24,2,2,1,8,5,8,1,1,9,3,5,30,7,3,5,1,1,1,1,1,1,11,25,25,35,70,6,6,4,4,3,8,4,4,4,6,30,50,35,25,35,4,4,4,1,25,1,4,25,8];
+const O=[];{let o=0;W.forEach(w=>{O.push(o);o+=w})}
+const RL=714;
+const PN="Álava|Albacete|Alicante|Almería|Ávila|Badajoz|Baleares|Barcelona|Burgos|Cáceres|Cádiz|Castellón|Ciudad Real|Córdoba|A Coruña|Cuenca|Girona|Granada|Guadalajara|Gipuzkoa|Huelva|Huesca|Jaén|León|Lleida|La Rioja|Lugo|Madrid|Málaga|Murcia|Navarra|Ourense|Asturias|Palencia|Las Palmas|Pontevedra|Salamanca|S. C. Tenerife|Cantabria|Segovia|Sevilla|Soria|Tarragona|Teruel|Toledo|Valencia|Valladolid|Bizkaia|Zamora|Zaragoza|Ceuta|Melilla".split("|");
+const PL="VI AB A AL AV BA PM B BU CC CA CS CR CO C CU GI GR GU SS H HU J LE L LO LU M MA MU NA OR O P GC PO SA TF S SG SE SO T TE TO V VA BI ZA Z CE ML".split(" ");
+const PM={};PN.forEach((n,i)=>{PM[String(i+1).padStart(2,"0")]=n;PM[PL[i]]=n});
+const PROP={"0":"Gasolina","1":"Diésel","2":"Eléctrico","3":"Gas natural","4":"GLP","5":"Otros/Híbrido"};
+const CCB=[[0,"Sin cilindrada"],[50,"≤ 50 cc"],[125,"51–125 cc"],[250,"126–250 cc"],[500,"251–500 cc"],[750,"501–750 cc"],[1000,"751–1.000 cc"],[1400,"1.001–1.400 cc"],[2000,"1.401–2.000 cc"],[3000,"2.001–3.000 cc"],[1e9,"> 3.000 cc"]];
+const CAT=["Coche","Moto","Ciclomotor","Furgoneta","Camión","Autobús","Otros"];
+const cap=s=>s.replace(/\b([A-ZÁÉÍÓÚÑ])([A-ZÁÉÍÓÚÑ]+)\b/g,(m,a,b)=>m.length<=3?m:a+b.toLowerCase());
+const fmt=n=>Math.round(n).toLocaleString("es-ES");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const ccb=c=>{if(!c)return 0;for(let i=1;i<CCB.length;i++)if(c<=CCB[i][0])return i;return CCB.length-1};
+function catOf(h,t){h=(h||"").toUpperCase();if(h.startsWith("M1"))return 0;if(h.startsWith("L1")||h.startsWith("L2"))return 2;if(h.startsWith("L"))return 1;if(h.startsWith("N1"))return 3;if(h.startsWith("N"))return 4;if(h.startsWith("M"))return 5;
+ if(t==="40")return 0;if(t==="50")return 1;if(t==="51")return 2;return 6}
+
+let ROWS=[],S={},SORT={k:"n",d:-1};
+// fila: d(yyyymmdd) c(cat) ma mo pv(nombre) pr cc(bucket) nu pf n ccS kwS co2S
+function parseText(txt,acc,dates){
+ let p=0;const L=txt.length;
+ while(p<L){
+  let e=txt.indexOf("\n",p);if(e<0)e=L;
+  if(e-p>=RL-2){
+   const g=(i)=>txt.substr(p+O[i],W[i]).trim();
+   const f=g(0);
+   if(/^\d{8}$/.test(f)){
+    const d=+(f.slice(4)+f.slice(2,4)+f.slice(0,2));
+    const cat=catOf(g(47),g(7));
+    const ma=cap(g(3))||"(sin marca)",mo=g(4).toUpperCase()||"(s/m)";
+    const pvr=g(19),pv=PM[pvr]||PM[pvr.toUpperCase()]||pvr||"?";
+    const pr=PROP[g(8)]||"Otros";
+    const cc=+g(9)||0,kw=parseFloat(g(31).replace(",","."))||0,co2=+g(33)||0;
+    const nu=g(25)==="U"?"U":"N",pf=g(26)==="X"?"X":"D";
+    const k=d+"|"+cat+"|"+ma+"|"+mo+"|"+pv+"|"+pr+"|"+ccb(cc)+"|"+nu+"|"+pf;
+    let r=acc.get(k);if(!r){r={d,c:cat,ma,mo,pv,pr,cc:ccb(cc),nu,pf,n:0,ccS:0,kwS:0,co2S:0};acc.set(k,r)}
+    r.n++;r.ccS+=cc;r.kwS+=kw;r.co2S+=co2;dates.add(d);
+   }
+  }
+  p=e+1;
+ }
+}
+const dec=new TextDecoder("iso-8859-1");
+async function loadFiles(files){
+ const acc=new Map(),dates=new Set();let k=0;
+ for(const f of files){
+  $("st").textContent="Procesando "+f.name+" ("+(++k)+"/"+files.length+")…";await new Promise(r=>setTimeout(r,10));
+  try{
+   const buf=new Uint8Array(await f.arrayBuffer());
+   if(/\.zip$/i.test(f.name)||(buf[0]===80&&buf[1]===75)){
+    const z=fflate.unzipSync(buf);for(const n in z)if(/\.txt$/i.test(n))parseText(dec.decode(z[n]),acc,dates);
+   }else parseText(dec.decode(buf),acc,dates);
+  }catch(e){$("st").textContent="Error con "+f.name+": "+e.message;return}
+ }
+ if(!dates.size){$("st").textContent="No se encontraron registros válidos (¿es un fichero de matriculaciones de la DGT?).";return}
+ ROWS=ROWS.filter(r=>!dates.has(r.d)).concat([...acc.values()]);
+ $("st").textContent="Cargados "+dates.size+" día(s) · "+fmt([...acc.values()].reduce((a,r)=>a+r.n,0))+" matriculaciones.";
+ save();init();
+}
+// persistencia
+function idb(){return new Promise((res,rej)=>{try{const q=indexedDB.open("dgt-mat",1);q.onupgradeneeded=()=>q.result.createObjectStore("s");q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)}catch(e){rej(e)}})}
+async function save(){try{const db=await idb();db.transaction("s","readwrite").objectStore("s").put(ROWS,"rows")}catch(e){}}
+async function restore(){try{const db=await idb();return await new Promise(r=>{const q=db.transaction("s").objectStore("s").get("rows");q.onsuccess=()=>r(q.result||[]);q.onerror=()=>r([])})}catch(e){return[]}}
+// demo
+function demo(){
+ const M=[["Toyota","Corolla",0,1798,"Gasolina",9],["Toyota","Yaris",0,1490,"Gasolina",8],["Seat","Ibiza",0,999,"Gasolina",9],["Seat","León",0,1498,"Gasolina",7],["Dacia","Sandero",0,999,"Gasolina",8],["Renault","Clio",0,999,"Gasolina",7],["Volkswagen","T-Roc",0,1498,"Gasolina",7],["Hyundai","Tucson",0,1598,"Gasolina",6],["Kia","Sportage",0,1598,"Diésel",6],["Tesla","Model 3",0,0,"Eléctrico",3],["BYD","Dolphin",0,0,"Eléctrico",2],["MG","ZS",0,1498,"Gasolina",5],["Peugeot","208",0,1199,"Gasolina",7],["Citroën","C3",0,1199,"Gasolina",5],["Ford","Puma",0,999,"Gasolina",4],["Mercedes-Benz","Clase A",0,1332,"Diésel",3],["Honda","PCX 125",1,125,"Gasolina",5],["Yamaha","NMAX 125",1,125,"Gasolina",4],["Honda","Forza 350",1,330,"Gasolina",2],["BMW","R 1300 GS",1,1300,"Gasolina",1.4],["Kawasaki","Z900",1,948,"Gasolina",1.2],["Vespa","Primavera 50",2,49,"Gasolina",1],["Silence","S04",1,0,"Eléctrico",1.3],["Yamaha","MT-07",1,689,"Gasolina",1.5]];
+ const pw=[10,5,8,9,6,14,3,5,6,6,8,7,6,6,6,9,3,4,11,4,2,2,3,3,5,5,5,3,7,5,5,3,2,3,2,2];
+ const rnd=(()=>{let s=7;return()=>(s=(s*16807)%2147483647)/2147483647})();
+ const rows=[];const end=new Date(Date.UTC(2026,6,27));
+ for(let t=new Date(Date.UTC(2025,0,1));t<=end;t.setUTCDate(t.getUTCDate()+1)){
+  const wd=t.getUTCDay();if(wd===0||wd===6)continue;
+  const d=t.getUTCFullYear()*1e4+(t.getUTCMonth()+1)*100+t.getUTCDate(),mm=t.getUTCMonth();
+  const season=1+.25*Math.sin((mm-2)/12*6.28);
+  for(const m of M){
+   const nprov=3;for(let i=0;i<nprov;i++){
+    const pi=Math.floor(rnd()*rnd()*52);const n=Math.max(1,Math.round(m[5]*season*(.5+rnd())*(pi===27||pi===7?2:1)));
+    const cat=m[2];rows.push({d,c:cat,ma:m[0],mo:m[1].toUpperCase(),pv:PN[pi],pr:m[4],cc:ccb(m[3]),nu:rnd()<.04?"U":"N",pf:rnd()<.3?"X":"D",n,ccS:m[3]*n,kwS:(m[3]?m[3]/12:70)*n,co2S:(m[4]==="Eléctrico"?0:110+rnd()*40)*n});
+   }}}
+ ROWS=rows;$("st").textContent="Datos de ejemplo ficticios cargados.";save();init();
+}
+// filtros
+const F=["from","to","cat","marca","modelo","prov","prop","cc","nu","pf","year"];
+function opts(sel,list,all){$(sel).innerHTML='<option value="">'+all+"</option>"+list.map(([v,l])=>'<option value="'+esc(v)+'">'+esc(l)+"</option>").join("")}
+function init(){
+ if(!ROWS.length){$("meta").textContent="Sin datos cargados";render();return}
+ const ds=ROWS.map(r=>r.d);const mn=Math.min(...ds),mx=Math.max(...ds);
+ const iso=d=>String(d).replace(/(\d{4})(\d\d)(\d\d)/,"$1-$2-$3");
+ $("meta").textContent="Datos del "+iso(mn)+" al "+iso(mx)+" · "+fmt(ROWS.reduce((a,r)=>a+r.n,0))+" matriculaciones";
+ S={};const u=k=>[...new Set(ROWS.map(r=>r[k]))];
+ opts("f-cat",[...u("c")].sort().map(c=>[c,CAT[c]]),"Todos");
+ opts("f-prov",u("pv").sort().map(p=>[p,p]),"Todas");
+ opts("f-prop",u("pr").sort().map(p=>[p,p]),"Todos");
+ opts("f-cc",[...u("cc")].sort((a,b)=>a-b).map(i=>[i,CCB[i][1]]),"Todas");
+ opts("f-year",[...new Set(ds.map(d=>Math.floor(d/1e4)))].sort().reverse().map(y=>[y,y]),"Todos");
+ $("dl-marca").innerHTML=u("ma").sort().map(m=>'<option value="'+esc(m)+'">').join("");
+ F.forEach(k=>{const e=$("f-"+k);if(e)e.value=""});
+ $("f-from").min=$("f-to").min=iso(mn);$("f-from").max=$("f-to").max=iso(mx);
+ render();
+}
+function rd(){S={};F.forEach(k=>{const v=$("f-"+k).value.trim();if(v)S[k]=v})}
+function pass(r){
+ if(S.from&&r.d<+S.from.replace(/-/g,""))return 0;if(S.to&&r.d>+S.to.replace(/-/g,""))return 0;
+ if(S.year&&Math.floor(r.d/1e4)!=S.year)return 0;
+ if(S.cat!==undefined&&r.c!=S.cat)return 0;if(S.marca&&r.ma.toLowerCase()!==S.marca.toLowerCase())return 0;
+ if(S.modelo&&r.mo.toLowerCase()!==S.modelo.toLowerCase())return 0;if(S.prov&&r.pv!==S.prov)return 0;
+ if(S.prop&&r.pr!==S.prop)return 0;if(S.cc!==undefined&&r.cc!=S.cc)return 0;if(S.nu&&r.nu!==S.nu)return 0;if(S.pf&&r.pf!==S.pf)return 0;return 1}
+function bars(id,map,key,lab,max){
+ const a=[...map.entries()].sort((x,y)=>y[1]-x[1]);const tot=a.reduce((s,x)=>s+x[1],0)||1;const m=a[0]?a[0][1]:1;
+ $(id).innerHTML=a.slice(0,max||60).map(([k,v])=>'<div class="br" data-k="'+key+'" data-v="'+esc(k)+'"><span title="'+esc(lab?lab(k):k)+'">'+esc(lab?lab(k):k)+'</span><div><i style="width:'+(v/m*100)+'%"></i></div><em>'+fmt(v)+" · "+(v/tot*100).toFixed(1)+"%</em></div>").join("")||'<div class="note">Sin datos</div>'}
+let GROUP=[];
+function render(){
+ rd();const rows=ROWS.filter(pass);
+ const T=new Map(),Ma=new Map(),Mo=new Map(),Pv=new Map(),Pr=new Map(),Cc=new Map(),G=new Map();
+ let tot=0,ccS=0,ccN=0,kwS=0,kwN=0,coS=0,coN=0,ev=0;const days=new Set();
+ const add=(m,k,n)=>m.set(k,(m.get(k)||0)+n);
+ const dayMode=(()=>{const g=$("gran").value;if(g!=="auto")return g==="d";if(!rows.length)return false;let a=1e9,b=0;rows.forEach(r=>{a=Math.min(a,r.d);b=Math.max(b,r.d)});return (Date.UTC(b/1e4|0,((b/100)|0)%100-1,b%100)-Date.UTC(a/1e4|0,((a/100)|0)%100-1,a%100))/864e5<=75})();
+ for(const r of rows){
+  tot+=r.n;days.add(r.d);add(T,dayMode?r.d:Math.floor(r.d/100),r.n);add(Ma,r.ma,r.n);add(Mo,r.ma+" "+r.mo,r.n);add(Pv,r.pv,r.n);add(Pr,r.pr,r.n);add(Cc,r.cc,r.n);
+  if(r.pr==="Eléctrico")ev+=r.n;
+  if(r.cc){ccS+=r.ccS;ccN+=r.n}if(r.kwS>0){kwS+=r.kwS;kwN+=r.n}if(r.co2S>0){coS+=r.co2S;coN+=r.n}
+  const k=r.ma+"\t"+r.mo;let g=G.get(k);if(!g){g={ma:r.ma,mo:r.mo,n:0,ccS:0,ccN:0,kwS:0,kwN:0,co2S:0,co2N:0};G.set(k,g)}
+  g.n+=r.n;if(r.cc){g.ccS+=r.ccS;g.ccN+=r.n}if(r.kwS>0){g.kwS+=r.kwS;g.kwN+=r.n}if(r.co2S>0){g.co2S+=r.co2S;g.co2N+=r.n}
+ }
+ const nd=days.size||1,top=[...Ma.entries()].sort((a,b)=>b[1]-a[1])[0],topM=[...Mo.entries()].sort((a,b)=>b[1]-a[1])[0];
+ $("kpis").innerHTML=[["Matriculaciones",fmt(tot),"en el periodo filtrado"],["Media diaria",fmt(tot/nd),nd+" días con datos"],["Marca líder",top?top[0]:"–",top?(top[1]/tot*100).toFixed(1)+"% cuota":""],["Modelo líder",topM?topM[0]:"–",topM?fmt(topM[1])+" uds.":""],["Eléctricos",tot?(ev/tot*100).toFixed(1)+"%":"–",fmt(ev)+" uds."],["Cilindrada media",ccN?fmt(ccS/ccN)+" cc":"–","excl. eléctricos"],["Potencia media",kwN?fmt(kwS/kwN)+" kW":"–",""],["CO₂ medio",coN?fmt(coS/coN)+" g/km":"–","WLTP/NEDC según ficha"]].map(k=>'<div class="card kpi"><small>'+k[0]+"</small><b>"+esc(k[1])+"</b><small>"+esc(k[2])+"</small></div>").join("");
+ timeline(T,dayMode);
+ bars("b-marca",Ma,"marca");bars("b-modelo",Mo,"modelo");bars("b-prov",Pv,"prov");bars("b-prop",Pr,"prop");bars("b-cc",Cc,"cc",i=>CCB[i][1]);
+ GROUP=[...G.values()].map(g=>({ma:g.ma,mo:g.mo,n:g.n,s:g.n/(tot||1)*100,cc:g.ccN?g.ccS/g.ccN:0,kw:g.kwN?g.kwS/g.kwN:0,co2:g.co2N?g.co2S/g.co2N:0}));
+ table();chips();
+ $("dl-modelo").innerHTML=[...new Set(ROWS.filter(r=>!S.marca||r.ma.toLowerCase()===S.marca.toLowerCase()).map(r=>r.mo))].sort().slice(0,3000).map(m=>'<option value="'+esc(m)+'">').join("");
+}
+function timeline(T,dayMode){
+ const svg=$("tl"),e=[...T.entries()].sort((a,b)=>a[0]-b[0]);
+ if(!e.length){svg.innerHTML='<text x="10" y="30">Carga datos para ver la evolución</text>';return}
+ const w=Math.max(svg.parentNode.clientWidth,e.length*(dayMode?9:30)),h=220,pl=44,pb=22,m=Math.max(...e.map(x=>x[1]));
+ svg.setAttribute("width",w);svg.setAttribute("viewBox","0 0 "+w+" "+h);
+ const bw=(w-pl-8)/e.length;let s="";
+ for(let i=0;i<=4;i++){const y=10+(h-pb-10)*(1-i/4);s+='<line x1="'+pl+'" x2="'+w+'" y1="'+y+'" y2="'+y+'" stroke="var(--bd)"/><text x="'+(pl-4)+'" y="'+(y+3)+'" text-anchor="end">'+fmt(m*i/4)+"</text>"}
+ const lab=k=>dayMode?String(k).replace(/(\d{4})(\d\d)(\d\d)/,"$3/$2/$1"):String(k).replace(/(\d{4})(\d\d)/,"$2/$1");
+ e.forEach(([k,v],i)=>{const bh=(h-pb-10)*v/m,x=pl+i*bw;s+='<rect x="'+(x+1)+'" y="'+(h-pb-bh)+'" width="'+Math.max(1,bw-2)+'" height="'+bh+'" rx="2" fill="var(--ac)"><title>'+lab(k)+": "+fmt(v)+"</title></rect>";
+  if(i%Math.ceil(e.length/(w/70))===0)s+='<text x="'+(x+bw/2)+'" y="'+(h-6)+'" text-anchor="middle">'+lab(k)+"</text>"});
+ svg.innerHTML=s}
+function table(){
+ const q=$("q").value.toLowerCase(),{k,d}=SORT;
+ const a=GROUP.filter(g=>!q||(g.ma+" "+g.mo).toLowerCase().includes(q)).sort((x,y)=>typeof x[k]==="string"?d*-x[k].localeCompare(y[k]):d*(x[k]-y[k]));
+ $("tb").innerHTML=a.slice(0,200).map(g=>"<tr><td>"+esc(g.ma)+"</td><td>"+esc(g.mo)+'</td><td class="n">'+(g.cc?fmt(g.cc):"–")+'</td><td class="n">'+(g.kw?fmt(g.kw):"–")+'</td><td class="n">'+(g.co2?fmt(g.co2):"–")+'</td><td class="n">'+fmt(g.n)+'</td><td class="n">'+g.s.toFixed(2)+"%</td></tr>").join("");
+ $("tbn").textContent=a.length>200?"Mostrando 200 de "+fmt(a.length)+" modelos; usa el buscador o los filtros.":fmt(a.length)+" modelos"}
+const LB={from:"Desde",to:"Hasta",cat:"Vehículo",marca:"Marca",modelo:"Modelo",prov:"Provincia",prop:"Combustible",cc:"Cilindrada",nu:"Estado",pf:"Titular",year:"Año"};
+function chips(){$("chips").innerHTML=Object.keys(S).map(k=>'<span class="chip" data-c="'+k+'">'+LB[k]+": "+esc(k==="cat"?CAT[S[k]]:k==="cc"?CCB[S[k]][1]:S[k])+" ✕</span>").join("")}
+// eventos
+document.addEventListener("click",ev=>{
+ const b=ev.target.closest(".br");if(b){const k=b.dataset.k,v=b.dataset.v;let t=v;
+  if(k==="modelo"){const i=v.indexOf(" ");const row=ROWS.find(r=>v===r.ma+" "+r.mo);if(row){$("f-marca").value=row.ma;t=row.mo}}
+  $("f-"+k).value=t;render();return}
+ const c=ev.target.closest(".chip");if(c){$("f-"+c.dataset.c).value="";render();return}
+ const th=ev.target.closest("th[data-k]");if(th){const k=th.dataset.k;SORT=SORT.k===k?{k,d:-SORT.d}:{k,d:k==="ma"||k==="mo"?-1:-1};if(k==="ma"||k==="mo")SORT.d=SORT.d===-1?-1:1;table()}
+});
+F.forEach(k=>$("f-"+k).addEventListener(k==="marca"||k==="modelo"?"input":"change",render));
+$("gran").onchange=render;$("q").oninput=table;
+$("reset").onclick=()=>{F.forEach(k=>$("f-"+k).value="");render()};
+$("demo").onclick=demo;
+$("clear").onclick=()=>{ROWS=[];save();$("st").textContent="Datos borrados.";init()};
+$("file").onchange=e=>{if(e.target.files.length)loadFiles([...e.target.files])};
+$("theme").onclick=()=>{const r=document.documentElement,d=getComputedStyle(r).colorScheme.includes("dark");r.dataset.theme=d?"light":"dark";render()};
+const dz=$("drop");["dragover","dragenter"].forEach(n=>dz.addEventListener(n,e=>{e.preventDefault();dz.classList.add("hv")}));
+["dragleave","drop"].forEach(n=>dz.addEventListener(n,e=>{e.preventDefault();dz.classList.remove("hv")}));
+dz.addEventListener("drop",e=>{if(e.dataTransfer.files.length)loadFiles([...e.dataTransfer.files])});
+$("copy").onclick=async()=>{const t="Marca\tModelo\tUnidades\tCuota\n"+GROUP.sort((a,b)=>b.n-a.n).map(g=>[g.ma,g.mo,g.n,g.s.toFixed(2)].join("\t")).join("\n");try{await navigator.clipboard.writeText(t);$("st").textContent="Tabla copiada al portapapeles."}catch(e){$("st").textContent="El navegador bloqueó el portapapeles."}};
+window.addEventListener("resize",()=>{clearTimeout(window._rz);window._rz=setTimeout(render,200)});
+async function kv(op,key,val){try{const db=await idb();return await new Promise(r=>{const s=db.transaction("s",op==="set"?"readwrite":"readonly").objectStore("s");const q=op==="set"?s.put(val,key):s.get(key);q.onsuccess=()=>r(q.result);q.onerror=()=>r(null)})}catch(e){return null}}
+async function autoLoad(){
+ let idx;
+ try{const r=await fetch("data/index.json",{cache:"no-cache"});if(!r.ok)throw 0;idx=await r.json();if(!idx.months||!idx.months.length)throw 0}catch(e){ROWS=await restore();init();return}
+ const all=[];let i=0;
+ for(const m of idx.months){
+  $("st").textContent="Cargando "+m.m.slice(4)+"/"+m.m.slice(0,4)+" ("+(++i)+"/"+idx.months.length+")…";
+  let c=await kv("get","m"+m.m);
+  if(!c||c.v!==m.v){try{const r=await fetch("data/"+m.m+".json?v="+m.v);c={v:m.v,rows:(await r.json()).rows};kv("set","m"+m.m,c)}catch(e){if(!c)continue}}
+  for(const a of c.rows)all.push({d:a[0],c:a[1],ma:cap(a[2])||"(sin marca)",mo:a[3]||"(s/m)",pv:PM[a[4]]||PM[(a[4]||"").toUpperCase()]||a[4]||"?",pr:PROP[a[5]]||"Otros",cc:a[6],nu:a[7],pf:a[8],n:a[9],ccS:a[10],kwS:a[11],co2S:a[12]});
+ }
+ ROWS=all;init();$("st").textContent="Datos automáticos de la DGT · última actualización: "+idx.updated;
+}
+autoLoad();
+})();
+</script>
+</body>
+</html>
